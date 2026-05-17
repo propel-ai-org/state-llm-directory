@@ -4,6 +4,7 @@ import { ENTITIES } from "./states";
 
 const PUBLIC = join(import.meta.dir, "public");
 const db = openDb();
+let crawlInProgress = false;
 
 function buildApiResponse(runId: number | null) {
   const runs = getAllRuns(db);
@@ -73,7 +74,11 @@ function buildApiResponse(runId: number | null) {
 }
 
 async function serveStatic(path: string): Promise<Response> {
-  const file = Bun.file(join(PUBLIC, path));
+  const resolved = join(PUBLIC, path);
+  if (!resolved.startsWith(PUBLIC + "/") && resolved !== PUBLIC) {
+    return new Response("Forbidden", { status: 403 });
+  }
+  const file = Bun.file(resolved);
   if (await file.exists()) {
     return new Response(file);
   }
@@ -90,18 +95,25 @@ const server = Bun.serve({
     }
 
     if (url.pathname === "/api/data") {
-      const runId = url.searchParams.has("run_id")
-        ? Number(url.searchParams.get("run_id"))
-        : null;
+      const runIdParam = url.searchParams.get("run_id");
+      if (runIdParam !== null && !/^\d+$/.test(runIdParam)) {
+        return new Response("Invalid run_id", { status: 400 });
+      }
+      const runId = runIdParam ? Number(runIdParam) : null;
       const data = buildApiResponse(runId);
       return Response.json(data);
     }
 
     if (url.pathname === "/api/crawl" && req.method === "POST") {
-      Bun.spawn(["bun", join(import.meta.dir, "crawl.ts")], {
+      if (crawlInProgress) {
+        return Response.json({ ok: false, message: "Crawl already in progress" }, { status: 409 });
+      }
+      crawlInProgress = true;
+      const proc = Bun.spawn(["bun", join(import.meta.dir, "crawl.ts")], {
         stdout: "inherit",
         stderr: "inherit",
       });
+      proc.exited.then(() => { crawlInProgress = false; });
       return Response.json({ ok: true, message: "Crawl started in background" });
     }
 
