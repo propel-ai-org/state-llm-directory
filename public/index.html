@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>llms.txt State Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <div class="summary-bar" id="summary-bar">
+      <div>
+        <div class="count" id="found-count">—</div>
+        <div class="count-label">states & territories with llms.txt</div>
+      </div>
+      <div style="flex:1">
+        <div id="newly-added" style="font-size:.8125rem;color:var(--green);min-height:1.2em"></div>
+      </div>
+      <select id="run-selector" title="View historical run"></select>
+      <button class="btn btn-primary" id="crawl-btn">Run crawl</button>
+    </div>
+
+    <div class="grid-section">
+      <h2>Coverage</h2>
+      <div class="state-grid" id="state-grid"></div>
+      <div class="legend" style="margin-top:.75rem">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div> Has llms.txt</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--gray-200)"></div> Not found</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div> Changed since last run</div>
+      </div>
+    </div>
+
+    <div class="chart-section">
+      <h2>Adoption over time</h2>
+      <div class="chart-container" id="chart-container"></div>
+    </div>
+  </main>
+
+  <dialog id="detail-dialog">
+    <div class="dialog-header">
+      <div>
+        <h2 id="dialog-title"></h2>
+        <a id="dialog-url" href="#" target="_blank" style="font-size:.8125rem;color:var(--gray-400);text-decoration:none"></a>
+      </div>
+      <span class="status-badge" id="dialog-badge"></span>
+      <button class="dialog-close" id="dialog-close" aria-label="Close">×</button>
+    </div>
+    <div class="dialog-body" id="dialog-body"></div>
+  </dialog>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
