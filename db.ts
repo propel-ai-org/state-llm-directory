@@ -10,6 +10,7 @@ export function openDb(path?: string): Database {
   }
   const db = new Database(path ?? join(DATA_DIR, "tracker.db"));
   db.run("PRAGMA journal_mode=WAL");
+  db.run("PRAGMA foreign_keys=ON");
   db.run(`
     CREATE TABLE IF NOT EXISTS runs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,

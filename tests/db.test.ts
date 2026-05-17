@@ -83,12 +83,14 @@ describe("db", () => {
 
   test("getEntityHistory returns one entry per run", () => {
     const id1 = insertRun(db);
-    insertResult(db, { runId: id1, slug: "maryland", name: "Maryland", type: "state", url: "https://www.maryland.gov", found: true, httpStatus: 200, contentHash: "abc" });
+    insertResult(db, { runId: id1, slug: "maryland", name: "Maryland", type: "state", url: "https://www.maryland.gov", found: true, httpStatus: 200, contentHash: "hash_v1" });
     const id2 = insertRun(db);
-    insertResult(db, { runId: id2, slug: "maryland", name: "Maryland", type: "state", url: "https://www.maryland.gov", found: true, httpStatus: 200, contentHash: "abc" });
+    insertResult(db, { runId: id2, slug: "maryland", name: "Maryland", type: "state", url: "https://www.maryland.gov", found: true, httpStatus: 200, contentHash: "hash_v2" });
     const history = getEntityHistory(db, "maryland");
     expect(history).toHaveLength(2);
     expect(history[0].run_id).toBe(id1);
+    expect(history[0].content_hash).toBe("hash_v1");
     expect(history[1].run_id).toBe(id2);
+    expect(history[1].content_hash).toBe("hash_v2");
   });
 });
