@@ -1,0 +1,12 @@
+{
+  "name": "llms-tracker",
+  "version": "1.0.0",
+  "scripts": {
+    "crawl": "bun crawl.ts",
+    "serve": "bun serve.ts",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
