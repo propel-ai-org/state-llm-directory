@@ -13,6 +13,20 @@ export interface FetchResult {
   ms: number;
 }
 
+function looksLikeHtml(contentType: string | null, body: string): boolean {
+  if (contentType && /text\/html/i.test(contentType)) return true;
+  const head = body.trimStart().slice(0, 20).toLowerCase();
+  return head.startsWith("<!doctype") || head.startsWith("<html");
+}
+
+function landedOnLlmsTxt(finalUrl: string): boolean {
+  try {
+    return new URL(finalUrl).pathname.toLowerCase().endsWith("/llms.txt");
+  } catch {
+    return false;
+  }
+}
+
 export async function fetchLlms(baseUrl: string): Promise<FetchResult> {
   const start = Date.now();
   try {
@@ -22,11 +36,17 @@ export async function fetchLlms(baseUrl: string): Promise<FetchResult> {
       signal: AbortSignal.timeout(10_000),
     });
     const ms = Date.now() - start;
-    if (resp.ok) {
-      const content = await resp.text();
-      return { found: true, status: resp.status, content, ms };
+    if (!resp.ok) {
+      return { found: false, status: resp.status, ms };
     }
-    return { found: false, status: resp.status, ms };
+    if (resp.url && !landedOnLlmsTxt(resp.url)) {
+      return { found: false, status: resp.status, ms };
+    }
+    const content = await resp.text();
+    if (looksLikeHtml(resp.headers.get("content-type"), content)) {
+      return { found: false, status: resp.status, ms };
+    }
+    return { found: true, status: resp.status, content, ms };
   } catch {
     return { found: false, status: 0, ms: Date.now() - start };
   }
