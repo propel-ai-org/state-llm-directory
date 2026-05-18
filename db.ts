@@ -2,7 +2,7 @@ import { Database } from "bun:sqlite";
 import { join } from "path";
 import { mkdirSync } from "fs";
 
-const DATA_DIR = join(import.meta.dir, "data");
+const DATA_DIR = process.env.LLMS_TRACKER_DATA_DIR ?? join(import.meta.dir, "data");
 
 export function openDb(path?: string): Database {
   if (!path || path !== ":memory:") {

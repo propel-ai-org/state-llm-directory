@@ -2,6 +2,7 @@
   "name": "llms-tracker",
   "version": "1.0.0",
   "scripts": {
+    "start": "bun serve.ts",
     "crawl": "bun crawl.ts",
     "serve": "bun serve.ts",
     "test": "bun test"
