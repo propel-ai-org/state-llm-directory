@@ -167,12 +167,20 @@ function renderChart() {
   const container = document.getElementById('chart-container');
   const { runs, entities, summary } = appData;
 
-  if (runs.length < 2) {
-    container.innerHTML = '<p class="chart-empty">One run so far. Crawl again to see the trend.</p>';
+  // One point per day: keep the most recent run for each calendar day
+  const runsByDay = new Map();
+  for (const run of runs.slice().reverse()) {
+    const key = new Date(run.ran_at).toDateString();
+    runsByDay.set(key, run);
+  }
+  const dailyRuns = [...runsByDay.values()];
+
+  if (dailyRuns.length < 2) {
+    container.innerHTML = '<p class="chart-empty">One day of data so far. Check back tomorrow to see the trend.</p>';
     return;
   }
 
-  const points = runs.slice().reverse().map(run => {
+  const points = dailyRuns.map(run => {
     const count = entities.reduce((n, e) => {
       const h = e.history.find(h => h.run_id === run.id);
       return n + (h?.found ? 1 : 0);
@@ -193,12 +201,7 @@ function renderChart() {
   const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i)} ${yScale(p.count)}`).join(' ');
   const areaD = `${pathD} L ${xScale(points.length - 1)} ${yScale(0)} L ${xScale(0)} ${yScale(0)} Z`;
 
-  const allSameDay = points.every(p =>
-    p.date.toDateString() === points[0].date.toDateString()
-  );
-  const fmtDate = d => allSameDay
-    ? d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
-    : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  const fmtDate = d => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 
   const xLabels = points.map((p, i) => {
     const isEdge = i === 0 || i === points.length - 1;
