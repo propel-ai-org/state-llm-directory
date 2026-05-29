@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>civic-llms — agent spec for state government llms.txt</title>
+  <meta name="description" content="A consumption convention for AI agents fetching content from US state and territory government websites. Draft v0.1.">
+  <meta property="og:title" content="civic-llms — agent spec for state government llms.txt">
+  <meta property="og:description" content="A consumption convention for AI agents fetching content from US state and territory government websites. Draft v0.1.">
+  <meta property="og:type" content="article">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="spec-app">
+    <header class="spec-masthead">
+      <a class="spec-back" href="/">← Tracker</a>
+      <p class="kicker">civic-llms</p>
+      <h1 class="spec-title">
+        A consumption convention for agents fetching content from US state and
+        territory government websites.
+      </h1>
+      <p class="spec-status"><span class="spec-status-pill">Draft · v0.1</span></p>
+    </header>
+
+    <article class="spec-body">
+      <section class="spec-section">
+        <h2 class="spec-h2">What this is</h2>
+        <p class="spec-p">
+          When an agent fetches a page on a <code>.gov</code> or <code>.us</code> domain,
+          it should first check whether the site publishes an <code>llms.txt</code> file
+          at the root and use it as context for navigation. This document specifies that
+          pattern.
+        </p>
+        <p class="spec-p">
+          This is not a new file format — it uses the
+          <a href="https://llmstxt.org" target="_blank" rel="noopener">llms.txt</a>
+          proposal as-is. It is not a crawling or licensing policy — use
+          <code>robots.txt</code> for that.
+        </p>
+      </section>
+
+      <section class="spec-section">
+        <h2 class="spec-h2">Scope</h2>
+        <p class="spec-p">This convention applies to agents fetching content from:</p>
+        <ul class="spec-list">
+          <li>Any domain matching <code>*.gov</code> or <code>*.us</code></li>
+          <li>The five US territory root domains tracked at <a href="/">state-llms.keith.is</a></li>
+        </ul>
+        <p class="spec-p">
+          Agents MAY apply the same convention to non-US civic domains
+          (<code>.gc.ca</code>, <code>.gov.uk</code>, etc.), but this spec does not
+          require it.
+        </p>
+      </section>
+
+      <section class="spec-section">
+        <h2 class="spec-h2">The convention</h2>
+        <p class="spec-p">Before fetching any path on an in-scope domain, the agent:</p>
+        <ol class="spec-list spec-list-num">
+          <li>Issues <code>GET https://{root-domain}/llms.txt</code></li>
+          <li>
+            On <code>200</code>, parses the response as Markdown and uses it as
+            navigation context for subsequent fetches in the session
+          </li>
+          <li>
+            On <code>404</code> or other client errors, proceeds normally and records
+            the absence (see <em>Telemetry</em>)
+          </li>
+          <li>
+            On <code>5xx</code> or timeout, retries once with backoff; if still failing,
+            proceeds as in <code>404</code>
+          </li>
+        </ol>
+      </section>
+
+      <section class="spec-section">
+        <h2 class="spec-h2">Fetching rules</h2>
+        <dl class="spec-dl">
+          <dt>Method</dt>
+          <dd><code>GET</code></dd>
+
+          <dt>User-Agent</dt>
+          <dd>
+            Include <code>civic-llms/0.1</code> as a token in your existing
+            User-Agent string, e.g. <code>MyAgent/2.4 civic-llms/0.1</code>. This
+            lets state operators see who's consuming the file.
+          </dd>
+
+          <dt>Accept</dt>
+          <dd><code>text/markdown, text/plain;q=0.9, */*;q=0.1</code></dd>
+
+          <dt>Timeout</dt>
+          <dd>5 seconds for the initial request. Do not block other work on this.</dd>
+
+          <dt>Redirects</dt>
+          <dd>
+            Follow up to 3, but only if they stay within the same root domain.
+            Cross-domain redirects MUST be ignored — an <code>llms.txt</code> that
+            redirects to another origin cannot be trusted.
+          </dd>
+        </dl>
+      </section>
+
+      <section class="spec-section">
+        <h2 class="spec-h2">Caching</h2>
+        <ul class="spec-list">
+          <li>Honor <code>Cache-Control</code> and <code>ETag</code> headers if present.</li>
+          <li>If no caching headers, cache for 24 hours.</li>
+          <li>Re-fetch on cache miss or when the user starts a new session.</li>
+        </ul>
+      </section>
+
+      <section class="spec-section">
+        <h2 class="spec-h2">Parsing</h2>
+        <p class="spec-p">The file is Markdown. Agents have two consumption patterns:</p>
+        <ul class="spec-list spec-list-detail">
+          <li>
+            <strong>Raw inclusion</strong> (simplest): include the entire text in the
+            agent's system context. Recommended unless context budget is tight.
+          </li>
+          <li>
+            <strong>Structured parsing</strong>: extract H1/H2 sections and URLs,
+            treat each <code>## Section</code> as a category, and use linked URLs as
+            canonical destinations. Useful for routing logic.
+          </li>
+        </ul>
+        <p class="spec-p">
+          Agents SHOULD treat any URL listed in the <code>llms.txt</code> as
+          authoritative for the task or topic it's associated with, overriding
+          inferences from search results or sitemaps.
+        </p>
+        <p class="spec-p">
+          Agents SHOULD also respect explicit usage guidance in the file. For example,
+          Maryland's <code>llms.txt</code> says:
+          <em>"do not infer legal, policy, or eligibility determinations beyond
+          published content."</em>
+          An agent that ignores that and hallucinates eligibility rules is non-conformant.
+        </p>
+      </section>
+
+      <section class="spec-section">
+        <h2 class="spec-h2">Fallback</h2>
+        <p class="spec-p">
+          When <code>llms.txt</code> is absent (currently 54 of 56 US states and
+          territories), the agent falls back to standard navigation:
+        </p>
+        <ol class="spec-list spec-list-num">
+          <li><code>GET /sitemap.xml</code> for URL discovery</li>
+          <li><code>GET /robots.txt</code> for crawl restrictions</li>
+          <li>Heuristic navigation (search box, top-level nav, etc.)</li>
+        </ol>
+        <p class="spec-p">
+          The absence of <code>llms.txt</code> MUST NOT cause the agent to refuse
+          the task.
+        </p>
+      </section>
+
+      <section class="spec-section">
+        <h2 class="spec-h2">Telemetry</h2>
+        <p class="spec-p">
+          Agents SHOULD log which in-scope domains served <code>llms.txt</code> and
+          which didn't, including timestamps. Aggregated absence data is what creates
+          pressure on states to publish.
+        </p>
+        <p class="spec-p">
+          If you publish that data, link it from your project. The
+          <a href="/">state-llms.keith.is tracker</a> aggregates known publishers
+          across US states and territories.
+        </p>
+      </section>
+
+      <section class="spec-section">
+        <h2 class="spec-h2">Declaring compliance</h2>
+        <p class="spec-p">
+          A framework or agent that implements this convention SHOULD:
+        </p>
+        <ol class="spec-list spec-list-num">
+          <li>Include <code>civic-llms/0.1</code> in its User-Agent</li>
+          <li>Document the behavior in user-facing docs</li>
+          <li>
+            Expose a way for users to disable the check (some agents have legitimate
+            reasons to bypass it — testing, archival crawls, etc.)
+          </li>
+        </ol>
+      </section>
+
+      <section class="spec-section spec-section-callout">
+        <h2 class="spec-h2">Reference implementation</h2>
+        <p class="spec-p">
+          <em>Coming soon — MCP-based SNAP portal agent. Link will land here.</em>
+        </p>
+      </section>
+
+      <section class="spec-section">
+        <h2 class="spec-h2">Open questions</h2>
+        <p class="spec-p">These are intentionally unresolved in v0.1:</p>
+        <ul class="spec-list spec-list-detail">
+          <li>
+            <strong>llms-full.txt.</strong>
+            Should agents prefer the longer variant when available? Likely yes for
+            context-rich tasks, no for routing.
+          </li>
+          <li>
+            <strong><code>.md</code> endpoints.</strong>
+            The base llms.txt spec proposes that any page should be available at
+            <code>{url}.md</code>. Few gov sites do this today; worth revisiting
+            if adoption grows.
+          </li>
+          <li>
+            <strong>Per-agency <code>llms.txt</code>.</strong>
+            A state portal links to dozens of agency sub-sites. Should each have its
+            own? Almost certainly, but the convention here only covers root domains.
+          </li>
+          <li>
+            <strong>Authentication.</strong>
+            Higher-trust agents (operating on behalf of caseworkers, e.g.) may need
+            authenticated access to richer guidance. Out of scope for v0.1.
+          </li>
+        </ul>
+      </section>
+
+      <section class="spec-section spec-section-changelog">
+        <h2 class="spec-h2">Changelog</h2>
+        <ul class="spec-list">
+          <li><strong>2026-05-27</strong> — v0.1 draft published.</li>
+        </ul>
+      </section>
+    </article>
+  </main>
+
+  <footer class="page-footer">
+    <a class="page-footer-brand" href="https://www.joinpropel.com" target="_blank" rel="noopener" aria-label="Propel">
+      <svg width="32" height="32" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+        <path d="M27 0H9C4.02944 0 0 4.02944 0 9V27C0 31.9706 4.02944 36 9 36H27C31.9706 36 36 31.9706 36 27V9C36 4.02944 31.9706 0 27 0Z" fill="white"/>
+        <path d="M19.029 10.329C19.362 9.348 19.071 7.833 18.057 6.903C17.34 6.273 16.728 6.087 15.954 5.853C15.408 5.688 14.79 5.499 13.956 5.103C13.584 4.926 13.209 4.944 12.924 5.151C12.894 5.172 12.864 5.199 12.837 5.223C12.684 5.34 12.114 5.778 11.655 6.222C11.367 6.48 11.388 6.774 11.403 6.99V7.02C11.46 7.722 11.589 9.363 12.729 10.602C13.092 10.995 13.485 11.25 13.86 11.415C12.996 11.796 12.192 12.282 11.364 12.912C11.199 13.032 11.04 13.158 10.884 13.29C10.842 13.323 10.8 13.356 10.758 13.392C10.74 13.407 10.725 13.422 10.713 13.437C8.81998 15.117 7.62598 17.565 7.62598 20.286C7.62598 24.387 10.338 27.87 14.064 29.031C14.085 29.04 14.103 29.049 14.127 29.055C15.432 29.436 16.677 29.628 17.925 29.628C18.867 29.628 19.812 29.52 20.781 29.304C20.784 29.304 20.79 29.301 20.793 29.301C25.119 28.371 28.371 24.519 28.371 19.92C28.371 14.712 24.204 10.461 19.029 10.329ZM18.207 23.79C17.379 23.67 16.614 23.289 16.011 22.686C15.273 21.948 14.865 20.967 14.865 19.923C14.865 18.519 15.609 17.286 16.722 16.596C16.809 16.59 16.899 16.584 16.989 16.584C19.032 16.584 20.694 18.246 20.694 20.289C20.694 21.906 19.653 23.283 18.204 23.787L18.207 23.79Z" fill="black"/>
+        <path d="M17.5441 7.47005C16.9561 6.95405 16.4701 6.80705 15.7321 6.58205C15.1891 6.41705 14.5141 6.21305 13.6291 5.79305C13.5661 5.76305 13.5031 5.74805 13.4551 5.74805C13.4221 5.74805 13.3951 5.75405 13.3771 5.76905C13.3291 5.80505 13.2811 5.91605 13.3081 6.11105C13.4071 6.86705 13.9441 9.01205 15.2341 9.87605C16.1401 10.482 17.6281 10.434 18.1681 10.32C18.1891 10.314 18.2011 10.305 18.2071 10.296C18.7111 9.47405 18.1651 8.04005 17.5441 7.47305V7.47005Z" fill="#77CB46"/>
+        <path d="M18.7772 11.0913C13.9082 11.0913 9.94824 15.0513 9.94824 19.9203C9.94824 22.2783 10.8662 24.4953 12.5342 26.1633C14.2022 27.8313 16.4192 28.7493 18.7772 28.7493C23.6462 28.7493 27.6062 24.7893 27.6062 19.9203C27.6062 15.0513 23.6462 11.0913 18.7772 11.0913ZM22.0802 23.2263C21.1982 24.1083 20.0222 24.5943 18.7742 24.5943C17.5262 24.5943 16.3502 24.1083 15.4682 23.2263C14.5862 22.3443 14.1002 21.1683 14.1002 19.9203C14.1002 17.3433 16.1972 15.2463 18.7742 15.2463C21.3512 15.2463 23.4482 17.3433 23.4482 19.9203C23.4482 21.1683 22.9622 22.3443 22.0802 23.2263Z" fill="#FFBE00"/>
+      </svg>
+    </a>
+    <p class="page-footer-copy">
+      Made by <a href="https://keith.is" target="_blank" rel="noopener">Keith Kurson</a>
+      for the <a href="https://www.joinpropel.com" target="_blank" rel="noopener">Propel</a> AI Residency.
+    </p>
+  </footer>
+</body>
+</html>

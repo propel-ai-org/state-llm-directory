@@ -94,6 +94,14 @@ const server = Bun.serve({
       return serveStatic("index.html");
     }
 
+    if (url.pathname === "/spec" || url.pathname === "/spec.html") {
+      return serveStatic("spec.html");
+    }
+
+    if (url.pathname === "/publish" || url.pathname === "/publish.html") {
+      return serveStatic("publish.html");
+    }
+
     if (url.pathname === "/api/data") {
       const runIdParam = url.searchParams.get("run_id");
       if (runIdParam !== null && !/^\d+$/.test(runIdParam)) {

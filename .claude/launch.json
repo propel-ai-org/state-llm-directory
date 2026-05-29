@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "tracker",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["serve.ts"],
+      "port": 3131
+    }
+  ]
+}

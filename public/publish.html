@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Publishing an llms.txt for your state website — civic-llms</title>
+  <meta name="description" content="A guide for state digital teams: what to put in your llms.txt, what to leave out, and what good looks like.">
+  <meta property="og:title" content="Publishing an llms.txt for your state website">
+  <meta property="og:description" content="A guide for state digital teams: what to put in your llms.txt, what to leave out, and what good looks like.">
+  <meta property="og:type" content="article">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="spec-app">
+    <header class="spec-masthead">
+      <a class="spec-back" href="/">← Tracker</a>
+      <p class="kicker">Implementer guide</p>
+      <h1 class="spec-title">
+        Publishing an <em>llms.txt</em> for your state government website.
+      </h1>
+      <p class="spec-lede">
+        You can tell AI agents where the authoritative pages on your site are.
+        It's a short file at the root of your domain. This is how to write a good one.
+      </p>
+    </header>
+
+    <article class="spec-body">
+      <section class="spec-section">
+        <h2 class="spec-h2">Why publish one</h2>
+        <p class="spec-p">
+          A lot of residents looking for government services today start with an AI
+          assistant — ChatGPT, Claude, Copilot, a chatbot embedded in a benefits app.
+          When those tools browse your site on the resident's behalf, they're guessing
+          from search results: a county page that hasn't been touched in five years, a
+          third-party mirror, a press release that quotes superseded eligibility rules.
+        </p>
+        <p class="spec-p">
+          A 2KB file at <code>/llms.txt</code> fixes most of that. Three reasons it's
+          worth the hour to write one:
+        </p>
+        <ul class="spec-list spec-list-detail">
+          <li>
+            <strong>Control how AI represents your services.</strong>
+            When the agent has to guess, it gets things wrong. Tell it the canonical
+            URL for &ldquo;apply for SNAP&rdquo; and you stop the guessing.
+          </li>
+          <li>
+            <strong>Reduce support load.</strong>
+            Wrong information from AI produces calls and tickets. Right information
+            doesn't cost you anything extra.
+          </li>
+          <li>
+            <strong>A cheap modernization win.</strong>
+            No new infrastructure, no procurement, no policy review. One markdown file
+            at your domain root, maintained by the team that already maintains your site.
+          </li>
+        </ul>
+      </section>
+
+      <section class="spec-section">
+        <h2 class="spec-h2">What a good file includes</h2>
+        <p class="spec-p">
+          A good civic <code>llms.txt</code> is short — 1 to 3 KB. Long files defeat
+          the purpose because agents typically include the whole thing in context.
+        </p>
+
+        <h3 class="spec-h3">Required</h3>
+        <ul class="spec-list spec-list-detail">
+          <li>
+            <strong>A one-paragraph site description.</strong>
+            Who you are, what services you cover, what kind of information lives here.
+            Plain English.
+          </li>
+          <li>
+            <strong>Authoritative task-flow URLs, by name.</strong>
+            The most-asked questions, with the page that answers each. &ldquo;Apply for
+            SNAP&rdquo; → URL. &ldquo;Check unemployment status&rdquo; → URL. Don't make
+            the agent guess.
+          </li>
+          <li>
+            <strong>Usage guidance.</strong>
+            What shouldn't be inferred from your content — eligibility determinations,
+            legal advice, emergency alerts. Be explicit.
+          </li>
+        </ul>
+
+        <h3 class="spec-h3">Strongly recommended</h3>
+        <ul class="spec-list spec-list-detail">
+          <li>
+            <strong>Languages supported.</strong>
+            Which translations exist for which pages. Agents serving non-English
+            residents need this to route correctly.
+          </li>
+          <li>
+            <strong>An engineering contact.</strong>
+            An email or form for the team that maintains this file — not the general
+            helpdesk. Turns one-way scraping into a feedback loop.
+          </li>
+          <li>
+            <strong>Search URL pattern.</strong>
+            If your site has search, document the URL shape (e.g.
+            <code>/search?q={query}</code>) so agents can fall back to it for anything
+            you didn't list.
+          </li>
+          <li>
+            <strong>Content freshness notes.</strong>
+            When the file was last updated; which sections change often. Helps agents
+            decide how much to trust the file vs. re-fetch.
+          </li>
+        </ul>
+
+        <h3 class="spec-h3">Optional but useful</h3>
+        <ul class="spec-list spec-list-detail">
+          <li>
+            <strong>Deprecation / migration notices.</strong>
+            When a service URL moves, list the old one with a pointer to the new one
+            for a release cycle or two. Agents in mid-conversation can then redirect
+            cleanly.
+          </li>
+          <li>
+            <strong>Common alternate names.</strong>
+            &ldquo;Food stamps&rdquo; still means SNAP to most people. &ldquo;Obamacare&rdquo;
+            still means ACA. Agents should be told.
+          </li>
+        </ul>
+      </section>
+
+      <section class="spec-section">
+        <h2 class="spec-h2">A template you can adapt</h2>
+        <p class="spec-p">
+          Illustrative — URLs and content are made up. Replace with your own. Drop the
+          file at <code>https://your-state.gov/llms.txt</code>.
+        </p>
+        <pre class="spec-code-block"><code># Maryland State Government
+
+&gt; The official portal for the State of Maryland. Information about
+&gt; taxes, licenses, public benefits, voting, and state agencies.
+
+## How agents should use this file
+- Treat URLs below as authoritative; prefer them over search results.
+- Do not infer legal, policy, or eligibility determinations beyond
+  what is published on the linked pages.
+- Time-sensitive content (emergency alerts, weather, road conditions)
+  is not included here. Fetch /alerts directly.
+
+## Apply for benefits
+- [Apply for SNAP](https://www.maryland.gov/snap-apply) — food assistance
+- [Apply for Medicaid](https://www.maryland.gov/medicaid-apply) — health
+- [Apply for TCA](https://www.maryland.gov/tca) — cash assistance for families
+- [Check application status](https://www.maryland.gov/benefits-status)
+
+## Driver &amp; vehicle services
+- [Renew driver's license](https://www.maryland.gov/dl-renew)
+- [Register a vehicle](https://www.maryland.gov/vehicle-register)
+- [Pay a traffic ticket](https://www.maryland.gov/traffic-ticket)
+
+## Voting
+- [Check voter registration](https://www.maryland.gov/voter-check)
+- [Find your polling place](https://www.maryland.gov/polling-place)
+- [Register to vote](https://www.maryland.gov/voter-register)
+
+## Languages
+- English — default
+- Spanish — most service pages available at /es/{path}
+- Chinese — top 10 task flows only
+
+## Search
+- Pattern: https://www.maryland.gov/search?q={query}
+
+## Common alternate names
+- &quot;Food stamps&quot; → SNAP
+- &quot;Welfare&quot; → TCA (Temporary Cash Assistance)
+- &quot;DMV&quot; → MVA (Motor Vehicle Administration)
+
+## Last updated
+2026-05-29 — major sections change quarterly.
+
+## Contact
+- For corrections to this file: webops@maryland.gov
+- For service-specific issues: see linked agency pages.
+</code></pre>
+      </section>
+
+      <section class="spec-section">
+        <h2 class="spec-h2">What to leave out</h2>
+        <ul class="spec-list spec-list-detail">
+          <li>
+            <strong>Time-sensitive content.</strong>
+            Emergency alerts, weather, road closures. They go stale fast. Link to a
+            dedicated alerts page instead.
+          </li>
+          <li>
+            <strong>Every URL on your site.</strong>
+            This is a directory, not a sitemap. Keep it to top task flows.
+            <code>sitemap.xml</code> exists for the rest.
+          </li>
+          <li>
+            <strong>Crawl rules.</strong>
+            Those belong in <code>robots.txt</code>. Don't duplicate.
+          </li>
+          <li>
+            <strong>Walls of legal disclaimers.</strong>
+            Point at the canonical disclaimer page instead. The file is for navigation,
+            not litigation.
+          </li>
+          <li>
+            <strong>Anything that would surprise a resident.</strong>
+            If it shouldn't be in a public help article, it shouldn't be here either.
+          </li>
+        </ul>
+      </section>
+
+      <section class="spec-section">
+        <h2 class="spec-h2">What good looks like, and where to learn from</h2>
+        <p class="spec-p">
+          Today only two US states or territories publish an <code>llms.txt</code>.
+          <a href="https://www.maryland.gov/llms.txt" target="_blank" rel="noopener">Maryland</a>
+          is the strongest example currently published; it gets the usage-guidance
+          and content-freshness pieces right. Gaps worth beating:
+        </p>
+        <ul class="spec-list spec-list-detail">
+          <li>No task-flow URLs by name. An agent looking for &ldquo;apply for SNAP&rdquo; still has to guess.</li>
+          <li>No language information.</li>
+          <li>Contact is a general helpdesk address, not a machine-readable engineering channel.</li>
+          <li>No deprecation or migration signals.</li>
+        </ul>
+        <p class="spec-p">
+          <a href="https://www.americansamoa.gov/llms.txt" target="_blank" rel="noopener">American Samoa</a>
+          publishes a longer file but it reads closer to a sitemap dump — many URLs, little
+          usage guidance, no contact. Worth a look for structure, less so for content.
+        </p>
+        <p class="spec-p">If you publish one, beat both.</p>
+      </section>
+
+      <section class="spec-section">
+        <h2 class="spec-h2">Procurement notes</h2>
+        <p class="spec-p">
+          If you're writing an RFP for a digital services contract, ask vendors to
+          maintain a civic-conformant <code>llms.txt</code> as part of the deliverable.
+          It's a one-line ask with real downstream impact, and it forces the vendor to
+          have a clear answer for &ldquo;which pages on this site are authoritative?&rdquo;
+          — which is useful even if no agent ever reads the file.
+        </p>
+        <p class="spec-p">Suggested RFP language:</p>
+        <pre class="spec-code-block"><code>The vendor shall publish and maintain an llms.txt file at the
+root of the contracted domain, conformant with the civic-llms
+agent spec (state-llms.keith.is/spec). The file shall list, at
+minimum: top task flows by name with authoritative URLs, usage
+guidance for AI agents, supported languages, and an engineering
+contact for corrections.</code></pre>
+      </section>
+
+      <section class="spec-section spec-section-callout">
+        <h2 class="spec-h2">Need a hand?</h2>
+        <p class="spec-p">
+          If your team wants a review of a draft <code>llms.txt</code> before publishing,
+          open an issue on the
+          <a href="https://github.com/propel-ai-org/state-llm-directory" target="_blank" rel="noopener">tracker repo</a>
+          with your draft and we'll take a look.
+        </p>
+      </section>
+
+      <section class="spec-section">
+        <h2 class="spec-h2">See also</h2>
+        <ul class="spec-list">
+          <li><a href="/spec">The agent spec (civic-llms)</a> — what tools do with the file you publish.</li>
+          <li><a href="https://llmstxt.org" target="_blank" rel="noopener">llmstxt.org</a> — the base format specification.</li>
+          <li><a href="/">The tracker</a> — who's published, what's in their file, how it changes over time.</li>
+        </ul>
+      </section>
+    </article>
+  </main>
+
+  <footer class="page-footer">
+    <a class="page-footer-brand" href="https://www.joinpropel.com" target="_blank" rel="noopener" aria-label="Propel">
+      <svg width="32" height="32" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+        <path d="M27 0H9C4.02944 0 0 4.02944 0 9V27C0 31.9706 4.02944 36 9 36H27C31.9706 36 36 31.9706 36 27V9C36 4.02944 31.9706 0 27 0Z" fill="white"/>
+        <path d="M19.029 10.329C19.362 9.348 19.071 7.833 18.057 6.903C17.34 6.273 16.728 6.087 15.954 5.853C15.408 5.688 14.79 5.499 13.956 5.103C13.584 4.926 13.209 4.944 12.924 5.151C12.894 5.172 12.864 5.199 12.837 5.223C12.684 5.34 12.114 5.778 11.655 6.222C11.367 6.48 11.388 6.774 11.403 6.99V7.02C11.46 7.722 11.589 9.363 12.729 10.602C13.092 10.995 13.485 11.25 13.86 11.415C12.996 11.796 12.192 12.282 11.364 12.912C11.199 13.032 11.04 13.158 10.884 13.29C10.842 13.323 10.8 13.356 10.758 13.392C10.74 13.407 10.725 13.422 10.713 13.437C8.81998 15.117 7.62598 17.565 7.62598 20.286C7.62598 24.387 10.338 27.87 14.064 29.031C14.085 29.04 14.103 29.049 14.127 29.055C15.432 29.436 16.677 29.628 17.925 29.628C18.867 29.628 19.812 29.52 20.781 29.304C20.784 29.304 20.79 29.301 20.793 29.301C25.119 28.371 28.371 24.519 28.371 19.92C28.371 14.712 24.204 10.461 19.029 10.329ZM18.207 23.79C17.379 23.67 16.614 23.289 16.011 22.686C15.273 21.948 14.865 20.967 14.865 19.923C14.865 18.519 15.609 17.286 16.722 16.596C16.809 16.59 16.899 16.584 16.989 16.584C19.032 16.584 20.694 18.246 20.694 20.289C20.694 21.906 19.653 23.283 18.204 23.787L18.207 23.79Z" fill="black"/>
+        <path d="M17.5441 7.47005C16.9561 6.95405 16.4701 6.80705 15.7321 6.58205C15.1891 6.41705 14.5141 6.21305 13.6291 5.79305C13.5661 5.76305 13.5031 5.74805 13.4551 5.74805C13.4221 5.74805 13.3951 5.75405 13.3771 5.76905C13.3291 5.80505 13.2811 5.91605 13.3081 6.11105C13.4071 6.86705 13.9441 9.01205 15.2341 9.87605C16.1401 10.482 17.6281 10.434 18.1681 10.32C18.1891 10.314 18.2011 10.305 18.2071 10.296C18.7111 9.47405 18.1651 8.04005 17.5441 7.47305V7.47005Z" fill="#77CB46"/>
+        <path d="M18.7772 11.0913C13.9082 11.0913 9.94824 15.0513 9.94824 19.9203C9.94824 22.2783 10.8662 24.4953 12.5342 26.1633C14.2022 27.8313 16.4192 28.7493 18.7772 28.7493C23.6462 28.7493 27.6062 24.7893 27.6062 19.9203C27.6062 15.0513 23.6462 11.0913 18.7772 11.0913ZM22.0802 23.2263C21.1982 24.1083 20.0222 24.5943 18.7742 24.5943C17.5262 24.5943 16.3502 24.1083 15.4682 23.2263C14.5862 22.3443 14.1002 21.1683 14.1002 19.9203C14.1002 17.3433 16.1972 15.2463 18.7742 15.2463C21.3512 15.2463 23.4482 17.3433 23.4482 19.9203C23.4482 21.1683 22.9622 22.3443 22.0802 23.2263Z" fill="#FFBE00"/>
+      </svg>
+    </a>
+    <p class="page-footer-copy">
+      Made by <a href="https://keith.is" target="_blank" rel="noopener">Keith Kurson</a>
+      for the <a href="https://www.joinpropel.com" target="_blank" rel="noopener">Propel</a> AI Residency.
+    </p>
+  </footer>
+</body>
+</html>

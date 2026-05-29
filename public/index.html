@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>llms.txt State Tracker</title>
+  <title>llms.txt for state &amp; territory websites — tracker and agent spec</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -14,8 +14,14 @@
       <h1 class="headline" id="headline">
         <span id="found-count">—</span><span class="headline-of"> of </span><span id="total-count">—</span>
         <span class="headline-rest">state &amp; territory websites publish an</span>
-        <em class="headline-em">llms.txt</em>.
+        <em class="headline-em">llms.txt</em>
+        <span class="headline-rest">for AI agents</span>.
       </h1>
+      <p class="masthead-lede">
+        A short directory file agents use to find authoritative pages on a government site —
+        instead of guessing from search results.
+        <a class="masthead-lede-link" href="/spec">Building an agent? Read the spec →</a>
+      </p>
       <p class="subline" id="subline"></p>
       <div class="toolbar">
         <label class="run-picker">
@@ -37,20 +43,25 @@
     </section>
 
     <section class="chart-section">
-      <h2 class="section-head">Adoption over time</h2>
+      <h2 class="section-head">Publishers over time</h2>
+      <p class="chart-lede">
+        Each new publisher strengthens the case for agent builders to make <code>GET /llms.txt</code>
+        their first move. Today the file is read mostly by dev tools — Cursor, MCP servers, and the
+        agents built on them.
+      </p>
       <div class="chart-container" id="chart-container"></div>
     </section>
 
     <section class="why-section" aria-labelledby="why-heading">
-      <p class="why-eyebrow">Recommendation</p>
+      <p class="why-eyebrow">For state digital teams</p>
       <h2 class="why-headline" id="why-heading">
         Why a state should publish an <em>llms.txt</em>.
       </h2>
       <p class="why-lede">
         People are already asking AI assistants for help with benefits, taxes, voting, and licenses.
-        An <code>llms.txt</code> is a short, plain-language file that tells those models what your site is,
-        which pages are authoritative, and how to be careful with time-sensitive information.
-        Meet residents where they are.
+        When an agent — Cursor, an MCP server, anything browsing on their behalf — visits your site,
+        <code>llms.txt</code> is the first thing it can read. It tells the agent what your site is,
+        which URLs are authoritative, and how to handle time-sensitive content.
       </p>
 
       <div class="why-grid">
@@ -65,7 +76,7 @@
           <h3 class="why-card-title">A clear purpose</h3>
           <p class="why-card-body">
             One paragraph in plain English: who you are, who you serve, what kind of information lives here.
-            Models read this first.
+            The first thing an agent reads.
           </p>
         </article>
 
@@ -78,8 +89,9 @@
           </div>
           <h3 class="why-card-title">Authoritative URLs</h3>
           <p class="why-card-body">
-            Point AI to your canonical pages and section sitemaps so it cites the real source, not a stale
-            scrape or someone&rsquo;s third-party mirror.
+            Point agents at your canonical task-flow pages — &ldquo;apply for SNAP,&rdquo; &ldquo;check
+            unemployment status&rdquo; — by name. So the agent lands on the right page, not the
+            closest-looking search result.
           </p>
         </article>
 
@@ -92,7 +104,7 @@
           </div>
           <h3 class="why-card-title">Usage guidance</h3>
           <p class="why-card-body">
-            Tell models what to do with emergency alerts, eligibility rules, and legal notices.
+            Tell agents what to do with emergency alerts, eligibility rules, and legal notices.
             <a href="https://www.maryland.gov/llms.txt" target="_blank" rel="noopener">Maryland&rsquo;s file</a>
             is a good template: it explicitly excludes time-sensitive alerts.
           </p>
@@ -107,16 +119,21 @@
           </div>
           <h3 class="why-card-title">A way to reach you</h3>
           <p class="why-card-body">
-            An email or form for AI builders to flag issues, request fixes, or coordinate.
-            A two-line contact section turns black-box scraping into a feedback loop.
+            A machine-readable contact for the engineering team — not the general helpdesk.
+            Turns one-way scraping into a feedback loop with AI builders.
           </p>
         </article>
       </div>
 
+      <p class="why-cta">
+        <a href="/publish">Publishing your own? Read the implementer guide →</a>
+      </p>
+
       <p class="why-footer">
-        The <code>llms.txt</code> spec is small and open. Read it at
+        For more context: the <code>llms.txt</code> format at
         <a href="https://llmstxt.org" target="_blank" rel="noopener">llmstxt.org</a>,
-        then borrow what <a href="https://www.maryland.gov/llms.txt" target="_blank" rel="noopener">Maryland</a>
+        the <a href="/spec">civic-llms agent spec</a> on this site, and the files
+        <a href="https://www.maryland.gov/llms.txt" target="_blank" rel="noopener">Maryland</a>
         and <a href="https://www.americansamoa.gov/llms.txt" target="_blank" rel="noopener">American Samoa</a>
         are already shipping.
       </p>
