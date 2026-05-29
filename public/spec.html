@@ -82,9 +82,11 @@
 
           <dt>User-Agent</dt>
           <dd>
-            Include <code>civic-llms/0.1</code> as a token in your existing
-            User-Agent string, e.g. <code>MyAgent/2.4 civic-llms/0.1</code>. This
-            lets state operators see who's consuming the file.
+            Send a clear User-Agent that identifies your agent or product.
+            State operators use this to see who's consuming the file, surface
+            issues, and (when warranted) reach out. Generic UAs like
+            <code>python-requests</code> or <code>node-fetch</code> make that
+            impossible — name yourself.
           </dd>
 
           <dt>Accept</dt>
@@ -176,8 +178,11 @@
           A framework or agent that implements this convention SHOULD:
         </p>
         <ol class="spec-list spec-list-num">
-          <li>Include <code>civic-llms/0.1</code> in its User-Agent</li>
           <li>Document the behavior in user-facing docs</li>
+          <li>
+            Send a clear, identifying User-Agent so state operators can see who's
+            fetching the file
+          </li>
           <li>
             Expose a way for users to disable the check (some agents have legitimate
             reasons to bypass it — testing, archival crawls, etc.)
